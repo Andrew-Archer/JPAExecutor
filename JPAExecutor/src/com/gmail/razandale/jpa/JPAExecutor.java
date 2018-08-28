@@ -18,9 +18,14 @@ import javax.persistence.EntityTransaction;
  */
 public class JPAExecutor {
 
-    public synchronized static <T> T executeQuery(
-            Function<EntityManager, T> function,
-            EntityManagerFactory emf) {
+    private final EntityManagerFactory emf;
+    
+    public JPAExecutor(EntityManagerFactory emf){
+        this.emf = emf;
+    }
+
+    public synchronized <T> T executeQuery(
+            Function<EntityManager, T> function) {
         EntityManager em = emf.createEntityManager();
         try {
             EntityTransaction trans = em.getTransaction();
@@ -48,13 +53,12 @@ public class JPAExecutor {
      *
      * @param <T> тип сущности.
      * @param entity сама сущность для создания в базе.
-     * @param emf фабрика для создания EntityManager.
      * @return персистентная сущность.
      */
-    public static <T> T merge(T entity, EntityManagerFactory emf) {
+    public <T> T merge(T entity) {
         return executeQuery((em) -> {
             return em.merge(entity);
-        }, emf);
+        });
     }
 
     /**
@@ -62,13 +66,12 @@ public class JPAExecutor {
      *
      * @param <T> тип сущности.
      * @param entity сама сущность для создания в базе.
-     * @param emf фабрика для создания EntityManager.
      * @return персистентная сущность.
      */
-    public static <T> T persist(T entity, EntityManagerFactory emf) {
+    public <T> T persist(T entity) {
         return executeQuery((em) -> {
             em.persist(entity);
             return entity;
-        }, emf);
+        });
     }
 }
